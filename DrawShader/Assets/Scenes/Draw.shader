@@ -11,9 +11,18 @@ Shader "Unlit/Draw"
         Tags { "RenderType"="Opaque" }
         LOD 100
 
+        //Stencil {
+        //    Ref 1
+        //    Comp Always
+        //    Pass Replace
+        //}
+
         Pass
         {
-            ZTest On
+            // Stencil {
+            //    Ref 1
+            //    Comp Equal
+            //}
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
