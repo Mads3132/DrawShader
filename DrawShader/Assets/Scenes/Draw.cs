@@ -8,14 +8,11 @@ public class Draw : MonoBehaviour
     public Shader paintShader;
     //float startTime;
     public float speed = 0.2f;
-    public Color startColor = Color.red;
-    public Color endColor = Color.yellow;
-    public Gradient gradient;
+    public Color startColor;
+    public Color endColor;
+    private Gradient gradient;
     private GradientColorKey[] colorKey;
     private GradientAlphaKey[] alphaKey;
-
-    //public float duration = 2f;
-    //public float t = 0f;
 
     RenderTexture splatMap;
     Material snowMaterial,drawMaterial;
@@ -24,9 +21,13 @@ public class Draw : MonoBehaviour
     private float lastMouseMoveTime;
     private Vector3 lastMousePosition;
 
+    public float timerInit = 0.01f;
+    public float timeLeft;
     void Start()
     {
-        //startTime = Time.time;
+
+        timeLeft = timerInit;
+
         lastMouseMoveTime = Time.time;
         lastMousePosition = Input.mousePosition;
 
@@ -35,6 +36,10 @@ public class Draw : MonoBehaviour
         snowMaterial = GetComponent<MeshRenderer>().material;
         splatMap = new RenderTexture(1024, 1024, 0, RenderTextureFormat.ARGBFloat);
         snowMaterial.mainTexture = splatMap;
+    }
+    void Update()
+    {
+        timeLeft -= Time.deltaTime;
 
         gradient = new Gradient();
         colorKey = new GradientColorKey[2];
@@ -46,17 +51,13 @@ public class Draw : MonoBehaviour
         alphaKey = new GradientAlphaKey[2];
         alphaKey[0].alpha = 1.0f;
         alphaKey[0].time = 0.0f;
-        alphaKey[1].alpha = 0.0f;
+        alphaKey[1].alpha = 1.0f;
         alphaKey[1].time = 1.0f;
 
         gradient.SetKeys(colorKey, alphaKey);
-    }
-    void Update()
-    {
-        //float value = Mathf.Lerp(0f, 0.95f, speed);
-        //t += Time.deltaTime / duration;
+        
         Vector3 currentMousePosition = Input.mousePosition;
-        if(currentMousePosition != lastMousePosition)
+        if(currentMousePosition != lastMousePosition )
         {
             lastMouseMoveTime = Time.time;
             lastMousePosition = currentMousePosition;
@@ -72,8 +73,9 @@ public class Draw : MonoBehaviour
             drawMaterial.SetVector("_Color", gradient.Evaluate(0f));
             //drawMaterial.SetVector("_Color", startColor);
         }
-        else if(Time.time - lastMouseMoveTime > 0.00001f)
-            if(Physics.Raycast(cam.ScreenPointToRay(Input.mousePosition),out hit))
+        else if (timeLeft<0)
+        {
+            if (Physics.Raycast(cam.ScreenPointToRay(Input.mousePosition), out hit))
             {
                 drawMaterial.SetVector("_Coordinate", new Vector4(hit.textureCoord.x, hit.textureCoord.y, 0, 0));
                 RenderTexture temp = RenderTexture.GetTemporary(splatMap.width, splatMap.height, 0, RenderTextureFormat.ARGBFloat);
@@ -83,6 +85,8 @@ public class Draw : MonoBehaviour
                 //drawMaterial.SetVector("_Color", Color.Lerp(startColor, endColor, speed));
                 drawMaterial.SetVector("_Color", gradient.Evaluate(speed));
             }
+            timeLeft = timerInit;
+        }
     }
 
 /*

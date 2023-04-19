@@ -13,6 +13,7 @@ Shader "Unlit/Draw"
 
         Pass
         {
+            ZTest On
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -48,7 +49,7 @@ Shader "Unlit/Draw"
                 fixed4 col = tex2D(_MainTex, i.uv);
                 float draw =pow(saturate(1-distance(i.uv,_Coordinate.xy)),300);
                 fixed4 drawcol = _Color * (draw * 1);
-                return saturate(col + drawcol);
+                return drawcol +col;
             }
             ENDCG
         }
